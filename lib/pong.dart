@@ -28,16 +28,31 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   final int ballSpeed = 5;
 
   void checkBorders() {
+    double ballDiameter = 25;
     if (posX <= 0 && hDir == Direction.left) {
       hDir = Direction.right;
-    } else if (posX >= width - 25 && hDir == Direction.right) {
+    } else if (posX >= width - ballDiameter && hDir == Direction.right) {
       hDir = Direction.left;
     }
     if (posY <= 0 && vDir == Direction.up) {
       vDir = Direction.down;
-    } else if (posY >= height - 25 && vDir == Direction.down) {
-      vDir = Direction.up;
+    } else if (posY >= height - ballDiameter - batHeight &&
+        vDir == Direction.down) {
+      if (posX >= batPosition - ballDiameter &&
+          posX <= batPosition + batWidth + ballDiameter) {
+        print("True");
+        vDir = Direction.up;
+      } else {
+        animationController.stop();
+        dispose();
+      }
     }
+  }
+
+  void moveBat(DragUpdateDetails update) {
+    setState(() {
+      batPosition += update.delta.dx;
+    });
   }
 
   @override
@@ -70,8 +85,8 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
         builder: (BuildContext context, BoxConstraints constraints) {
       height = constraints.maxHeight;
       width = constraints.maxWidth;
-      batWidth = width / 5;
-      batHeight = height / 20;
+      batWidth = width / 4;
+      batHeight = height / 25;
       return Stack(
         children: [
           Positioned(
@@ -80,11 +95,24 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
             left: posX,
           ),
           Positioned(
-            child: Bat(width: batWidth, height: batHeight),
             bottom: 0,
+            left: batPosition,
+            child: GestureDetector(
+                onHorizontalDragUpdate: (DragUpdateDetails update) {
+                  moveBat(update);
+                },
+                child: Bat(width: batWidth, height: batHeight)),
           )
         ],
       );
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    animationController.dispose();
+
+    super.dispose();
   }
 }
