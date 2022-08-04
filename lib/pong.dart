@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'ball.dart';
@@ -26,22 +28,35 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   double batHeight = 0;
   double batPosition = 0;
   final int ballSpeed = 5;
+  double xRandom = 1;
+  double yRandom = 1;
+
+  double randomSpeed() {
+    Random random = Random();
+    //min=0.0 max= 1.5
+    double randomDouble = (random.nextInt(101) + 50) / 100;
+    print("Random $randomDouble");
+    return randomDouble;
+  }
 
   void checkBorders() {
     double ballDiameter = 25;
     if (posX <= 0 && hDir == Direction.left) {
       hDir = Direction.right;
+      xRandom = randomSpeed();
     } else if (posX >= width - ballDiameter && hDir == Direction.right) {
       hDir = Direction.left;
+      xRandom = randomSpeed();
     }
     if (posY <= 0 && vDir == Direction.up) {
       vDir = Direction.down;
+      yRandom = randomSpeed();
     } else if (posY >= height - ballDiameter - batHeight &&
         vDir == Direction.down) {
       if (posX >= batPosition - ballDiameter &&
           posX <= batPosition + batWidth + ballDiameter) {
-        print("True");
         vDir = Direction.up;
+        yRandom = randomSpeed();
       } else {
         animationController.stop();
         dispose();
@@ -69,9 +84,13 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     animation = Tween(begin: 0, end: 100).animate(animationController);
     animation.addListener(() {
       setState(() {
-        hDir == Direction.right ? posX += ballSpeed : posX -= ballSpeed;
+        hDir == Direction.right
+            ? posX += (ballSpeed * xRandom).round()
+            : posX -= (ballSpeed * xRandom).round();
 
-        vDir == Direction.down ? posY += ballSpeed : posY -= ballSpeed;
+        vDir == Direction.down
+            ? posY += (ballSpeed * yRandom).round()
+            : posY -= (ballSpeed * yRandom).round();
       });
       checkBorders();
     });
