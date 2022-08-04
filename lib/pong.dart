@@ -30,6 +30,7 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   final int ballSpeed = 5;
   double xRandom = 1;
   double yRandom = 1;
+  int score = 0;
 
   double randomSpeed() {
     Random random = Random();
@@ -56,6 +57,7 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
       if (posX >= batPosition - ballDiameter &&
           posX <= batPosition + batWidth + ballDiameter) {
         vDir = Direction.up;
+        score++;
         yRandom = randomSpeed();
       } else {
         animationController.stop();
@@ -108,6 +110,7 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
       batHeight = height / 25;
       return Stack(
         children: [
+          Positioned(right: 25, top: 1, child: Text("Score :$score")),
           Positioned(
             child: Ball(),
             top: posY,
