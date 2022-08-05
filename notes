@@ -1,0 +1,9 @@
+//Todo 1 We have to do safeSetState method to avoid bat moving while stop and dispose
+
+void safeSetState(Function function) {
+ if (mounted && controller.isAnimating) {
+ setState(() {
+ function();
+ });
+ }
+ }

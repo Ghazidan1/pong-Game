@@ -17,7 +17,6 @@ class Pong extends StatefulWidget {
 class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   late Animation animation;
   late AnimationController animationController;
-
   late double width;
   late double height;
   late double posX;
@@ -36,7 +35,6 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     Random random = Random();
     //min=0.0 max= 1.5
     double randomDouble = (random.nextInt(101) + 50) / 100;
-    print("Random $randomDouble");
     return randomDouble;
   }
 
@@ -61,7 +59,7 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
         yRandom = randomSpeed();
       } else {
         animationController.stop();
-        dispose();
+        showAlert(context);
       }
     }
   }
@@ -70,6 +68,63 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     setState(() {
       batPosition += update.delta.dx;
     });
+  }
+
+  void showAlert(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext) {
+          return AlertDialog(
+            title: Center(
+                child: Text(
+              "Game Over",
+              style: TextStyle(
+                  color: Colors.redAccent[700],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 32.0),
+            )),
+            content: Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 0.0),
+                    child: Text(
+                      score.toString(),
+                      style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[600]),
+                    ),
+                  ),
+                  Text(
+                    "Would you like to play again?",
+                    style: TextStyle(fontSize: 18),
+                  )
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      posX = 0;
+                      posY = 0;
+                      score = 0;
+                    });
+                    Navigator.of(context).pop();
+                    animationController.repeat();
+                  },
+                  child: Text("Yes")),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    dispose();
+                  },
+                  child: Text("No"))
+            ],
+          );
+        });
   }
 
   @override
@@ -102,32 +157,33 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      height = constraints.maxHeight;
-      width = constraints.maxWidth;
-      batWidth = width / 4;
-      batHeight = height / 25;
-      return Stack(
-        children: [
-          Positioned(right: 25, top: 1, child: Text("Score :$score")),
-          Positioned(
-            child: Ball(),
-            top: posY,
-            left: posX,
-          ),
-          Positioned(
-            bottom: 0,
-            left: batPosition,
-            child: GestureDetector(
-                onHorizontalDragUpdate: (DragUpdateDetails update) {
-                  moveBat(update);
-                },
-                child: Bat(width: batWidth, height: batHeight)),
-          )
-        ],
-      );
-    });
+    return GestureDetector(
+      onHorizontalDragUpdate: (DragUpdateDetails update) {
+        moveBat(update);
+      },
+      child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+        height = constraints.maxHeight;
+        width = constraints.maxWidth;
+        batWidth = width / 4;
+        batHeight = height / 25;
+        return Stack(
+          children: [
+            Positioned(right: 25, top: 1, child: Text("Score :$score")),
+            Positioned(
+              child: Ball(),
+              top: posY,
+              left: posX,
+            ),
+            Positioned(
+              bottom: 0,
+              left: batPosition,
+              child: Bat(width: batWidth, height: batHeight),
+            )
+          ],
+        );
+      }),
+    );
   }
 
   @override
